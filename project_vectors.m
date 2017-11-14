@@ -1,4 +1,4 @@
-function project_vectors(origForeignVecFile, origEnVecFile,  subsetEnVecFile, subsetForeignVecFile, outputEnFile, outputForeignFile, truncRatio)
+function project_vectors(dmlear, origEnVecFile,  subsetEnVecFile, subsetForeignVecFile, outputEnFile, outputForeignFile, truncRatio)
 
 % first column is words, hence not being read
 origEnVecs = dlmread(origEnVecFile, ' ', 0, 1);

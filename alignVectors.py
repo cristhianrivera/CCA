@@ -3,6 +3,7 @@ import argparse
 import numpy
 import gzip
 import math
+import os
 
 ''' Read all the word vectors and normalize them '''
 def read_word_vectors(filename):
@@ -21,6 +22,19 @@ def read_word_vectors(filename):
             
   sys.stderr.write("Vectors read from: "+filename+" \n")
   return wordVectors
+  
+def get_aligned_vectors(wordAlignFile, lang1WordVectors, lang2WordVectors):
+  alignedVectors = {}
+  lenLang1Vector = len(lang1WordVectors[lang1WordVectors.keys()[0]])#dimension of the embedding
+  for line in open(wordAlignFile, 'r'):
+    lang1Word, lang2Word = line.strip().split(" ||| ")
+    if lang2Word not in lang2WordVectors: continue
+    if lang1Word not in lang1WordVectors: continue
+    alignedVectors[lang2Word] = numpy.zeros(lenLang1Vector, dtype=float)
+    alignedVectors[lang2Word] += lang1WordVectors[lang1Word]
+
+  sys.stderr.write("No. of aligned vectors found: "+str(len(alignedVectors))+'\n')      
+  return alignedVectors
 
 def save_orig_subset_and_aligned(outFileName, lang2WordVectors, lang1AlignedVectors):
   outFile = open(outFileName+'_orig_subset.txt','w')
@@ -32,21 +46,8 @@ def save_orig_subset_and_aligned(outFileName, lang2WordVectors, lang1AlignedVect
   for word in lang1AlignedVectors:
     outFile.write(word+' '+' '.join([str(val) for val in lang1AlignedVectors[word]])+'\n')
   outFile.close()
-  
-def get_aligned_vectors(wordAlignFile, lang1WordVectors, lang2WordVectors):
-  alignedVectors = {}
-  lenLang1Vector = len(lang1WordVectors[lang1WordVectors.keys()[0]])
-  for line in open(wordAlignFile, 'r'):
-    lang1Word, lang2Word = line.strip().split(" ||| ")
-    if lang2Word not in lang2WordVectors: continue
-    if lang1Word not in lang1WordVectors: continue
-    alignedVectors[lang2Word] = numpy.zeros(lenLang1Vector, dtype=float)
-    alignedVectors[lang2Word] += lang1WordVectors[lang1Word]
 
-  sys.stderr.write("No. of aligned vectors found: "+str(len(alignedVectors))+'\n')      
-  return alignedVectors
-
-
+"""
 if __name__=='__main__':
     
   parser = argparse.ArgumentParser()
@@ -61,3 +62,18 @@ if __name__=='__main__':
     
   lang1AlignedVectors = get_aligned_vectors(args.wordaligncountfile, lang1WordVectors, lang2WordVectors)
   save_orig_subset_and_aligned(args.outputfile, lang2WordVectors, lang1AlignedVectors)
+"""
+
+        
+os.chdir('/Users/Cristhian/Documents/crosslingual-cca')
+lang1WordVectors = read_word_vectors('en-sample.txt') #10000
+lang2WordVectors = read_word_vectors('de-sample.txt') #15000
+lang1AlignedVectors = get_aligned_vectors('align-sample.txt', lang1WordVectors, lang2WordVectors)
+save_orig_subset_and_aligned('out', lang2WordVectors, lang1AlignedVectors)
+
+  
+
+       
+        
+        
+
